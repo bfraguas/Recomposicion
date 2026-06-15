@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<meta name="theme-color" content="#0C0C0C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Plan Recomp">
+<title>Plan Recomposicion</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0C0C0C;color:#F0F0F0;padding:20px 16px 110px;min-height:100vh;max-width:520px;margin:0 auto}
+.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#C8F135;font-weight:700;margin-bottom:6px}
+h1{font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1.1;margin-bottom:4px}
+.subtitle{font-size:12px;color:#666;margin-bottom:18px}
+.person-wrap{display:flex;gap:8px;margin-bottom:12px}
+.person-btn{flex:1;padding:10px;border:1px solid #252525;border-radius:10px;background:#161616;color:#666;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.person-btn.active{border-color:#C8F135;color:#F0F0F0;background:#1A1A1A}
+.avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.person-btn.active .avatar{background:#C8F135;color:#000}
+.person-btn:not(.active) .avatar{background:#2A2A2A;color:#555}
+.toggle-wrap{display:flex;background:#161616;border:1px solid #252525;border-radius:10px;padding:4px;gap:4px;margin-bottom:18px}
+.toggle-btn{flex:1;padding:10px 0;border:none;border-radius:7px;background:transparent;color:#666;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.toggle-btn.active{background:#C8F135;color:#000}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-card{background:#161616;border:1px solid #252525;border-radius:10px;padding:12px}
+.stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#555;margin-bottom:4px;font-weight:700}
+.stat-value{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.stat-unit{font-size:10px;color:#555;margin-top:1px}
+.macro-card{background:#161616;border:1px solid #252525;border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.macro-bar-wrap{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin:10px 0}
+.macro-legend{display:flex;gap:14px;flex-wrap:wrap}
+.macro-legend-item{display:flex;align-items:center;gap:5px;font-size:11px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.mac-label{color:#666}
+.mac-val{font-weight:700}
+.meals-wrap{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.meal-card{background:#161616;border:1px solid #252525;border-radius:12px;overflow:hidden;transition:border-color .15s}
+.meal-card.open{border-color:rgba(200,241,53,.35)}
+.meal-card.eaten{opacity:.65}
+.meal-card.pre-workout{border-color:#FF8C6940}
+.meal-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.meal-icon{width:42px;height:42px;border-radius:10px;background:#232323;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:background .15s}
+.meal-card.open .meal-icon{background:#C8F135}
+.meal-card.pre-workout .meal-icon{background:#FF8C6930}
+.meal-time{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#555;font-weight:700;margin-bottom:2px}
+.meal-card.open .meal-time{color:#C8F135}
+.meal-card.pre-workout .meal-time{color:#FF8C69}
+.meal-name{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.meal-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
+.meal-kcal{font-size:18px;font-weight:800;text-align:right}
+.meal-card.open .meal-kcal{color:#C8F135}
+.meal-kcal-unit{font-size:10px;color:#555;text-align:right}
+.eat-btn{width:32px;height:32px;border-radius:8px;border:1px solid #333;background:transparent;color:#555;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.meal-card.eaten .eat-btn{background:#C8F13530;border-color:#C8F135;color:#C8F135}
+.chevron{font-size:13px;color:#444;margin-left:2px;transition:transform .2s;flex-shrink:0}
+.meal-card.open .chevron{transform:rotate(180deg)}
+.mini-bar-wrap{height:3px;display:flex;gap:1px;margin:-6px 16px 10px;border-radius:2px;overflow:hidden}
+.meal-body{padding:0 16px 16px;display:none}
+.meal-card.open .meal-body{display:block}
+.macro-pills{display:flex;gap:8px;margin-bottom:14px}
+.macro-pill{flex:1;background:#1E1E1E;border-radius:8px;padding:8px;text-align:center}
+.pill-label{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.pill-val{font-size:15px;font-weight:800}
+.item-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;font-size:13px;color:#D0D0D0;line-height:1.4;border-bottom:1px solid #1E1E1E}
+.item-row:last-child{border-bottom:none}
+.item-dot{width:5px;height:5px;border-radius:50%;background:#C8F135;margin-top:5px;flex-shrink:0}
+.tip-box{background:#131313;border-left:3px solid #C8F135;border-radius:0 8px 8px 0;padding:9px 12px;font-size:12px;color:#777;line-height:1.5;margin-top:12px}
+.meal-card.pre-workout .tip-box{border-color:#FF8C69}
+.acc-btn{width:100%;background:#1A1A1A;border:1px solid #252525;border-radius:8px;padding:9px 12px;font-size:12px;color:#888;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:inherit;margin-top:10px}
+.acc-btn:hover{border-color:#555;color:#bbb}
+.acc-body{display:none;margin-top:6px;background:#111;border:1px solid #1E1E1E;border-radius:8px;padding:12px}
+.acc-body.open{display:block}
+.sub-group{margin-bottom:10px}
+.sub-group:last-child{margin-bottom:0}
+.sub-group-label{font-size:10px;font-weight:700;color:#FF8C69;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.sub-opt{font-size:12px;color:#888;padding:3px 0 3px 12px;position:relative;line-height:1.4}
+.sub-opt::before{content:"";position:absolute;left:0;top:8px;width:4px;height:4px;border-radius:50%;background:#333}
+.calc-row{display:flex;gap:8px;margin-bottom:10px;align-items:flex-end}
+.calc-field{flex:1}
+.calc-label{font-size:10px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.calc-input{width:100%;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:7px;padding:8px 10px;font-size:13px;color:#F0F0F0;font-family:inherit;outline:none}
+.calc-input:focus{border-color:#C8F135}
+.calc-gram{width:72px;flex:none}
+.calc-result{background:#0F0F0F;border:1px solid #1E1E1E;border-radius:8px;padding:10px 12px;margin-top:4px}
+.calc-result-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px;border-bottom:1px solid #1A1A1A}
+.calc-result-row:last-child{border-bottom:none}
+.calc-result-label{color:#666}
+.rules-card{background:#161616;border:1px solid #252525;border-radius:12px;padding:16px}
+.rules-eyebrow{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:#C8F135;font-weight:700;margin-bottom:12px}
+.rule-row{display:flex;gap:10px;padding:8px 0;font-size:12.5px;color:#888;border-bottom:1px solid #1E1E1E;line-height:1.4}
+.rule-row:last-child{border-bottom:none}
+.rule-icon{font-size:14px;flex-shrink:0}
+.footer-note{margin-top:18px;font-size:11px;color:#333;text-align:center;line-height:1.6;margin-bottom:4px}
+.tracker{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #222;padding:10px 16px 14px;z-index:50;max-width:520px;margin:0 auto}
+.tracker-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.tracker-pct{font-size:20px;font-weight:800;color:#C8F135;flex-shrink:0;width:48px}
+.tracker-bar-wrap{flex:1}
+.tracker-bar-bg{height:6px;background:#222;border-radius:3px;overflow:hidden}
+.tracker-bar-fill{height:100%;background:#C8F135;border-radius:3px;transition:width .3s}
+.tracker-kcal{font-size:11px;color:#666;margin-top:3px}
+.tracker-reset{background:none;border:1px solid #252525;border-radius:7px;padding:6px 10px;color:#555;font-size:11px;cursor:pointer;flex-shrink:0}
+.tracker-macros{display:flex;gap:14px}
+.tmacro{display:flex;align-items:center;gap:5px;font-size:11px}
+.tmacro-l{font-weight:700}
+.tmacro-v{color:#888}
+</style>
+</head>
+<body>
+
+<div class="eyebrow">Semana de Definicion</div>
+<h1>Plan de recomposicion</h1>
+<p class="subtitle">Proteinas en peso crudo &middot; &#9711; marca lo que has comido</p>
+
+<div class="person-wrap">
+  <button class="person-btn active" onclick="setPerson('borja')"><div class="avatar">B</div>Borja &middot; 68kg</button>
+  <button class="person-btn" onclick="setPerson('lurdes')"><div class="avatar">L</div>Lurdes &middot; 53kg</button>
+</div>
+<div class="toggle-wrap">
+  <button class="toggle-btn active" onclick="setDay('gym')">&#127947; Dia Gym</button>
+  <button class="toggle-btn" onclick="setDay('rest')">&#128715; Fin de Semana</button>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-label">Calorias</div><div class="stat-value" style="color:#C8F135" id="s-kcal"></div><div class="stat-unit">kcal/dia</div></div>
+  <div class="stat-card"><div class="stat-label">Deficit</div><div class="stat-value" style="color:#FF8C69" id="s-def"></div><div class="stat-unit">kcal</div></div>
+  <div class="stat-card"><div class="stat-label">Proteina</div><div class="stat-value" style="color:#FF6B6B" id="s-prot"></div><div class="stat-unit" id="s-unit"></div></div>
+</div>
+
+<div class="macro-card">
+  <div class="stat-label">Distribucion de macros</div>
+  <div class="macro-bar-wrap" id="macro-bar"></div>
+  <div class="macro-legend">
+    <div class="macro-legend-item"><div class="dot" style="background:#FF6B6B"></div><span class="mac-label">Proteina&nbsp;</span><span class="mac-val" style="color:#FF6B6B" id="ml-p"></span></div>
+    <div class="macro-legend-item"><div class="dot" style="background:#4DC9FF"></div><span class="mac-label">Carbs&nbsp;</span><span class="mac-val" style="color:#4DC9FF" id="ml-c"></span></div>
+    <div class="macro-legend-item"><div class="dot" style="background:#FFD166"></div><span class="mac-label">Grasas&nbsp;</span><span class="mac-val" style="color:#FFD166" id="ml-g"></span></div>
+  </div>
+</div>
+
+<datalist id="food-list"><option value="AOVE"><option value="Aguacate"><option value="Arandanos"><option value="Arroz blanco cocido"><option value="Arroz blanco crudo"><option value="Atun fresco crudo"><option value="Avena cruda"><option value="Boniato cocido"><option value="Brocoli cocido"><option value="Caballa cruda"><option value="Claras de huevo"><option value="Coliflor cocida"><option value="Datil medjool"><option value="Dorada cruda"><option value="Esparragos cocidos"><option value="Espinacas cocidas"><option value="Gambas cocidas"><option value="Huevo entero"><option value="Judias verdes cocidas"><option value="Lechuga"><option value="Lino molido"><option value="Lubina cruda"><option value="Manzana"><option value="Merluza cruda"><option value="Miel"><option value="Nueces"><option value="Patata cocida"><option value="Pechuga pavo crudo"><option value="Pechuga pollo crudo"><option value="Pepino"><option value="Platano"><option value="Queso fresco 0%"><option value="Quinoa cocida"><option value="Rucula fresca"><option value="Salmon crudo"><option value="Semillas chia"><option value="Ternera magra cruda"><option value="Tofu firme"><option value="Tomate"><option value="Tortitas de arroz"><option value="Yogur de coco sin azucar"><option value="Yogur griego 0%"></datalist>
+
+<div class="meals-wrap" id="meals-container"></div>
+
+<div class="rules-card">
+  <div class="rules-eyebrow">Protocolo anti-hinchazon</div>
+  <div class="rule-row"><span class="rule-icon">&#9878;</span><strong style="color:#C8F135">Proteinas en peso crudo</strong> &mdash; pollo, pavo, pescado antes de cocinar</div>
+  <div class="rule-row"><span class="rule-icon">&#128166;</span>3 litros de agua al dia minimo</div>
+  <div class="rule-row"><span class="rule-icon">&#128683;</span>Sin pan, alcohol ni refrescos esta semana</div>
+  <div class="rule-row"><span class="rule-icon">&#129361;</span>Pepino, esparragos y apio: diureticos naturales</div>
+  <div class="rule-row"><span class="rule-icon">&#9200;</span>Cena antes de las 21:30, sin carbos nocturnos</div>
+</div>
+<div class="footer-note" id="footer-note"></div>
+
+<div class="tracker">
+  <div class="tracker-top">
+    <div class="tracker-pct" id="tr-pct">0%</div>
+    <div class="tracker-bar-wrap">
+      <div class="tracker-bar-bg"><div class="tracker-bar-fill" id="tr-fill" style="width:0%"></div></div>
+      <div class="tracker-kcal" id="tr-kcal">0 / 0 kcal consumidas</div>
+    </div>
+    <button class="tracker-reset" onclick="resetDay()">&#8635; Reset</button>
+  </div>
+  <div class="tracker-macros">
+    <div class="tmacro"><span class="tmacro-l" style="color:#FF6B6B">P&nbsp;</span><span class="tmacro-v" id="tr-p">0/0g</span></div>
+    <div class="tmacro"><span class="tmacro-l" style="color:#4DC9FF">C&nbsp;</span><span class="tmacro-v" id="tr-c">0/0g</span></div>
+    <div class="tmacro"><span class="tmacro-l" style="color:#FFD166">G&nbsp;</span><span class="tmacro-v" id="tr-g">0/0g</span></div>
+  </div>
+</div>
+
+<script>
+var P = {"borja": {"gym": {"kcal": "1.896", "def": "-504", "prot": "163g", "unit": "2.4g/kg", "tdee": 2400, "macros": {"p": 163, "c": 180, "g": 58}, "meals": [{"id": "des", "time": "08:00", "icon": "\ud83c\udf05", "name": "Desayuno", "kcal": 635, "macros": {"p": 33, "c": 74, "g": 24}, "items": ["4 huevos a la plancha (220g)", "6 tortitas de arroz (55g)", "1 platano mediano (120g)", "Cafe solo sin azucar"], "subs": [{"label": "Sin huevos", "opts": ["1-2 huevos + 50g claras pasteurizadas (17 kcal c/u)", "200g yogur griego 0% + 2 huevos"]}, {"label": "Sin tortitas", "opts": ["50g copos de avena sin gluten (195 kcal)", "4 biscotes tipo Wasa (130 kcal)"]}, {"label": "Sin platano", "opts": ["1 manzana (80 kcal)", "150g arandanos (84 kcal)"]}], "tip": "Digestion limpia, cero hinchazon. Tortitas untadas con queso fresco 0% si apetece algo mas."}, {"id": "pre", "time": "30 min antes del gym", "icon": "\u26a1", "name": "Pre-entreno", "kcal": 117, "macros": {"p": 2, "c": 25, "g": 1}, "preWorkout": true, "items": ["30g tortitas de arroz", "Cafe solo sin azucar"], "subs": [{"label": "Sin tortitas", "opts": ["1 platano pequeno (89 kcal)", "30g datiles (83 kcal)", "1 cda miel en agua (61 kcal)"]}], "tip": "Carbos rapidos 30 min antes del gym. Mejora el rendimiento sin pesadez."}, {"id": "com", "time": "14:00", "icon": "\ud83c\udf7d", "name": "Comida", "kcal": 669, "macros": {"p": 67, "c": 58, "g": 17}, "items": ["250g pechuga de pollo en crudo \u2192 plancha sin aceite", "300g patata cocida (o 180g arroz blanco cocido)", "Ensalada grande \u2014 lechuga, tomate, pepino (200g)", "10ml AOVE + vinagre de manzana"], "subs": [{"label": "Sin pollo", "opts": ["250g pechuga pavo crudo (275 kcal)", "200g atun fresco (220 kcal, -G)", "180g ternera magra cruda (270 kcal)"]}, {"label": "Sin patata", "opts": ["180g arroz blanco cocido (234 kcal)", "200g boniato cocido (172 kcal)", "150g quinoa cocida (180 kcal)"]}], "tip": "Pesa el pollo en crudo. Carbohidratos aqui, post-gym. Alterna patata y arroz cada dia."}, {"id": "cen", "time": "21:00", "icon": "\ud83c\udf19", "name": "Cena", "kcal": 475, "macros": {"p": 61, "c": 23, "g": 16}, "items": ["200g merluza, dorada o lenguado en crudo \u2192 horno", "350g brocoli o judias verdes al vapor", "10ml AOVE", "150g queso fresco batido 0%"], "subs": [{"label": "Sin merluza", "opts": ["200g lubina o dorada (180 kcal)", "160g atun fresco (140 kcal)", "200g gambas cocidas (160 kcal)"]}, {"label": "Sin brocoli", "opts": ["300g esparragos (75 kcal)", "300g coliflor (78 kcal)", "300g espinacas (69 kcal)"]}], "tip": "Proteina alta, carbs minimos. El queso fresco al final cubre el dulce sin romper el deficit."}]}, "rest": {"kcal": "1.771", "def": "-629", "prot": "147g", "unit": "2.2g/kg", "tdee": 2400, "macros": {"p": 147, "c": 136, "g": 71}, "meals": [{"id": "des", "time": "09:30", "icon": "\ud83c\udf05", "name": "Desayuno", "kcal": 597, "macros": {"p": 32, "c": 66, "g": 23}, "items": ["4 huevos a la plancha (220g)", "5 tortitas de arroz (45g)", "1 platano mediano (120g)", "Cafe solo sin azucar"], "subs": [{"label": "Sin tortitas", "opts": ["50g copos de avena (195 kcal)", "4 biscotes Wasa (130 kcal)"]}, {"label": "Sin platano", "opts": ["1 manzana (80 kcal)", "150g arandanos (84 kcal)"]}], "tip": "Misma base, una tortita menos. Sin prisa el finde."}, {"id": "com", "time": "14:30", "icon": "\ud83d\udc1f", "name": "Comida", "kcal": 685, "macros": {"p": 46, "c": 50, "g": 34}, "items": ["200g salmon en crudo \u2192 horno", "50g arroz blanco crudo (= ~150g cocido)", "Ensalada \u2014 lechuga, pepino, tomate (100g)", "75g aguacate"], "subs": [{"label": "Sin salmon", "opts": ["200g caballa al horno (378 kcal)", "200g pez espada (220 kcal)", "200g trucha (220 kcal)"]}, {"label": "Sin aguacate", "opts": ["10ml AOVE extra (88 kcal)", "15g nueces (100 kcal)"]}], "tip": "El salmon da omega-3 antiinflamatorios. El aguacate reemplaza el AOVE y da saciedad."}, {"id": "cen", "time": "20:30", "icon": "\ud83c\udf19", "name": "Cena", "kcal": 489, "macros": {"p": 69, "c": 20, "g": 14}, "items": ["200g pavo en crudo \u2192 plancha", "300g verduras variadas al vapor", "10ml AOVE", "150g queso fresco batido 0%"], "subs": [{"label": "Sin pavo", "opts": ["200g pollo crudo (240 kcal)", "200g merluza cruda (172 kcal)", "150g ternera magra cruda (225 kcal)"]}], "tip": "Misma estructura de cena. La consistencia hace el trabajo."}]}}, "lurdes": {"gym": {"kcal": "1.640", "def": "-240", "prot": "122g", "unit": "2.3g/kg", "tdee": 1880, "macros": {"p": 122, "c": 161, "g": 55}, "meals": [{"id": "des", "time": "08:00", "icon": "\ud83c\udf05", "name": "Desayuno", "kcal": 538, "macros": {"p": 27, "c": 62, "g": 21}, "items": ["3 huevos a la plancha (165g)", "4 tortitas de arroz certificadas sin gluten (36g)", "1 platano mediano (120g)", "1 cda semillas de lino molidas (10g)", "Cafe solo sin azucar"], "subs": [{"label": "Sin tortitas", "opts": ["40g copos de avena sin gluten (155 kcal)", "3 biscotes de maiz sin gluten (97 kcal)"]}, {"label": "Sin platano", "opts": ["150g arandanos (84 kcal) \u2014 mas antiinflamatorio", "100g frambuesas (52 kcal)"]}], "tip": "Semillas de lino: regulan el estrogeno, clave en endometriosis. Sin sabor, se echan sobre las tortitas. Verificar sello sin gluten en la marca."}, {"id": "pre", "time": "30 min antes del gym", "icon": "\u26a1", "name": "Pre-entreno", "kcal": 78, "macros": {"p": 1, "c": 17, "g": 1}, "preWorkout": true, "items": ["20g tortitas de arroz sin gluten", "Cafe solo sin azucar"], "subs": [{"label": "Sin tortitas", "opts": ["1 datil medjool (18g, 50 kcal) \u2014 rico en hierro", "1 platano pequeno (89 kcal)"]}], "tip": "Carbos rapidos 30 min antes. Los datiles son ideales: hierro natural, importante en endometriosis."}, {"id": "com", "time": "14:00", "icon": "\ud83c\udf7d", "name": "Comida", "kcal": 580, "macros": {"p": 52, "c": 55, "g": 16}, "items": ["200g pechuga de pollo en crudo \u2192 plancha sin aceite", "250g boniato al horno (o 160g arroz blanco cocido)", "Ensalada \u2014 rucula, lechuga, tomate, pepino (150g)", "10ml AOVE + vinagre de manzana", "Curcuma + pimienta negra al cocinar el pollo"], "subs": [{"label": "Sin pollo", "opts": ["200g pechuga pavo entera cruda (218 kcal)", "180g atun fresco (194 kcal)", "150g ternera magra cruda (225 kcal, max 1-2x semana)"]}, {"label": "Sin boniato", "opts": ["200g patata cocida (154 kcal)", "150g quinoa cocida (180 kcal)", "160g arroz blanco cocido (208 kcal)"]}], "tip": "Boniato: mas beta-caroteno, mas antiinflamatorio que la patata. Rucula es crucifero. Curcuma + pimienta negra: antiinflamatorio potente."}, {"id": "cen", "time": "21:00", "icon": "\ud83c\udf19", "name": "Cena", "kcal": 444, "macros": {"p": 42, "c": 27, "g": 17}, "items": ["150g merluza, dorada o lenguado en crudo \u2192 horno", "300g brocoli o judias verdes al vapor", "8ml AOVE", "150g yogur de coco natural sin azucar"], "subs": [{"label": "Sin merluza", "opts": ["150g lubina o dorada (135 kcal)", "120g atun fresco (130 kcal)", "150g gambas cocidas (150 kcal)"]}, {"label": "Sin brocoli", "opts": ["300g esparragos (75 kcal)", "300g coliflor (78 kcal)", "300g espinacas (69 kcal)"]}, {"label": "Sin yogur de coco", "opts": ["150g yogur de cabra natural (110 kcal)", "100g tofu sedoso (55 kcal)"]}], "tip": "Yogur de coco en lugar de queso fresco: sin lacteo, probioticos para la salud intestinal. El brocoli tiene sulforafano, potente antiinflamatorio."}]}, "rest": {"kcal": "1.482", "def": "-398", "prot": "103g", "unit": "1.9g/kg", "tdee": 1880, "macros": {"p": 103, "c": 121, "g": 64}, "meals": [{"id": "des", "time": "09:30", "icon": "\ud83c\udf05", "name": "Desayuno", "kcal": 503, "macros": {"p": 26, "c": 54, "g": 21}, "items": ["3 huevos a la plancha (165g)", "3 tortitas de arroz sin gluten (27g)", "1 platano mediano (120g)", "1 cda semillas de lino molidas (10g)", "Cafe solo sin azucar"], "subs": [{"label": "Sin tortitas", "opts": ["40g copos de avena sin gluten (155 kcal)", "3 biscotes de maiz sin gluten (97 kcal)"]}, {"label": "Sin platano", "opts": ["150g arandanos (84 kcal)", "100g frambuesas (52 kcal)"]}], "tip": "Semillas de lino todos los dias. Sin prisa el finde."}, {"id": "com", "time": "14:30", "icon": "\ud83d\udc1f", "name": "Comida", "kcal": 535, "macros": {"p": 35, "c": 40, "g": 26}, "items": ["150g salmon en crudo \u2192 horno", "40g arroz blanco crudo (= ~120g cocido)", "Ensalada \u2014 rucula, lechuga, pepino, tomate (100g)", "60g aguacate", "Curcuma + pimienta negra al cocinar"], "subs": [{"label": "Sin salmon", "opts": ["150g caballa al horno (284 kcal, mucho omega-3)", "150g pez espada (165 kcal)", "150g trucha (165 kcal)"]}, {"label": "Sin aguacate", "opts": ["8ml AOVE (71 kcal)", "15g nueces (98 kcal) \u2014 omega-3 vegetal"]}], "tip": "Salmon el finde: omega-3 y apoyo hormonal para endometriosis. Curcuma siempre con pimienta negra."}, {"id": "cen", "time": "20:30", "icon": "\ud83c\udf19", "name": "Cena", "kcal": 444, "macros": {"p": 42, "c": 27, "g": 17}, "items": ["150g pechuga de pavo entera en crudo \u2192 plancha (NO fiambre)", "300g verduras variadas al vapor", "8ml AOVE", "150g yogur de coco natural sin azucar"], "subs": [{"label": "Sin pavo", "opts": ["150g pollo crudo (180 kcal)", "150g merluza cruda (129 kcal)", "130g ternera magra cruda (195 kcal, max 1-2x semana)"]}, {"label": "Sin yogur de coco", "opts": ["150g yogur de cabra natural (110 kcal)", "100g tofu sedoso (55 kcal)"]}], "tip": "IMPORTANTE: pechuga entera de pavo, nunca fiambre. El fiambre lleva nitratos y posible gluten oculto."}]}}};
+var FOODS = {"Pechuga pollo crudo": {"p": 23.0, "c": 0, "g": 2.4, "k": 120}, "Pechuga pavo crudo": {"p": 23.0, "c": 0, "g": 1.0, "k": 109}, "Salmon crudo": {"p": 20.0, "c": 0, "g": 11.0, "k": 180}, "Merluza cruda": {"p": 17.0, "c": 0, "g": 1.9, "k": 86}, "Dorada cruda": {"p": 18.0, "c": 0, "g": 3.0, "k": 100}, "Lubina cruda": {"p": 18.5, "c": 0, "g": 2.5, "k": 97}, "Atun fresco crudo": {"p": 23.0, "c": 0, "g": 1.0, "k": 108}, "Caballa cruda": {"p": 19.0, "c": 0, "g": 12.0, "k": 189}, "Gambas cocidas": {"p": 20.0, "c": 1.0, "g": 2.0, "k": 100}, "Ternera magra cruda": {"p": 20.0, "c": 0, "g": 8.0, "k": 150}, "Huevo entero": {"p": 12.6, "c": 0.7, "g": 9.9, "k": 143}, "Claras de huevo": {"p": 11.0, "c": 0.7, "g": 0.2, "k": 52}, "Queso fresco 0%": {"p": 11.0, "c": 3.3, "g": 0.5, "k": 62}, "Yogur griego 0%": {"p": 10.0, "c": 3.6, "g": 0.4, "k": 59}, "Yogur de coco sin azucar": {"p": 0.5, "c": 8.0, "g": 4.5, "k": 75}, "Tofu firme": {"p": 8.0, "c": 1.9, "g": 4.8, "k": 83}, "Arroz blanco crudo": {"p": 6.7, "c": 79.3, "g": 0.7, "k": 360}, "Arroz blanco cocido": {"p": 2.7, "c": 28.0, "g": 0.3, "k": 130}, "Patata cocida": {"p": 2.0, "c": 17.0, "g": 0.1, "k": 77}, "Boniato cocido": {"p": 1.6, "c": 20.0, "g": 0.1, "k": 86}, "Avena cruda": {"p": 16.9, "c": 66.3, "g": 6.9, "k": 389}, "Tortitas de arroz": {"p": 7.0, "c": 82.0, "g": 3.0, "k": 390}, "Quinoa cocida": {"p": 4.4, "c": 21.3, "g": 1.9, "k": 120}, "Platano": {"p": 1.1, "c": 22.8, "g": 0.3, "k": 89}, "Manzana": {"p": 0.3, "c": 13.8, "g": 0.2, "k": 52}, "Arandanos": {"p": 0.7, "c": 14.5, "g": 0.3, "k": 57}, "Datil medjool": {"p": 1.8, "c": 75.0, "g": 0.2, "k": 277}, "Miel": {"p": 0.3, "c": 82.4, "g": 0, "k": 304}, "AOVE": {"p": 0, "c": 0, "g": 100, "k": 884}, "Aguacate": {"p": 2.0, "c": 8.5, "g": 14.7, "k": 160}, "Nueces": {"p": 15.2, "c": 13.7, "g": 65.2, "k": 654}, "Lino molido": {"p": 18.3, "c": 28.9, "g": 42.2, "k": 534}, "Semillas chia": {"p": 16.5, "c": 42.1, "g": 30.7, "k": 486}, "Brocoli cocido": {"p": 2.8, "c": 5.1, "g": 0.4, "k": 35}, "Judias verdes cocidas": {"p": 1.8, "c": 4.3, "g": 0.2, "k": 25}, "Esparragos cocidos": {"p": 2.5, "c": 2.4, "g": 0.1, "k": 20}, "Coliflor cocida": {"p": 2.0, "c": 5.0, "g": 0.3, "k": 25}, "Espinacas cocidas": {"p": 2.9, "c": 1.4, "g": 0.4, "k": 23}, "Rucula fresca": {"p": 2.6, "c": 3.7, "g": 0.7, "k": 25}, "Lechuga": {"p": 1.4, "c": 2.2, "g": 0.2, "k": 15}, "Tomate": {"p": 0.9, "c": 3.9, "g": 0.2, "k": 20}, "Pepino": {"p": 0.7, "c": 2.2, "g": 0.1, "k": 12}};
+
+var person = "borja", day = "gym", openMeal = null, openSubs = {}, openCalc = {};
+
+function getKey() { return "track_" + person + "_" + day + "_" + new Date().toISOString().split("T")[0]; }
+function loadEaten() { try { return JSON.parse(localStorage.getItem(getKey())) || {}; } catch(e) { return {}; } }
+function saveEaten(e) { localStorage.setItem(getKey(), JSON.stringify(e)); }
+
+function setPerson(p) {
+  person = p; openMeal = null; openSubs = {}; openCalc = {};
+  document.querySelectorAll(".person-btn").forEach(function(b,i) { b.classList.toggle("active",(i===0&&p==="borja")||(i===1&&p==="lurdes")); });
+  render();
+}
+function setDay(d) {
+  day = d; openMeal = null; openSubs = {}; openCalc = {};
+  document.querySelectorAll(".toggle-btn").forEach(function(b,i) { b.classList.toggle("active",(i===0&&d==="gym")||(i===1&&d==="rest")); });
+  render();
+}
+function toggleMeal(i) { openMeal = openMeal === i ? null : i; render(); }
+function toggleSubs(id) { openSubs[id] = !openSubs[id]; render(); }
+function toggleCalc(id) { openCalc[id] = !openCalc[id]; render(); }
+function toggleEat(id) { var e = loadEaten(); e[id] = !e[id]; saveEaten(e); render(); }
+function resetDay() { localStorage.removeItem(getKey()); render(); }
+
+function pcts(m) {
+  var t = m.p*4 + m.c*4 + m.g*9;
+  if (!t) return {p:0,c:0,g:0};
+  return { p: Math.round(m.p*4/t*100), c: Math.round(m.c*4/t*100), g: Math.round(m.g*9/t*100) };
+}
+function r1(n) { return Math.round(n*10)/10; }
+function fmt(n) { return n >= 1000 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : Math.round(n).toString(); }
+
+function calcFood(id) {
+  var inp = document.getElementById("fi-" + id).value.trim();
+  var gr = parseFloat(document.getElementById("fg-" + id).value) || 0;
+  var food = FOODS[inp];
+  var res = document.getElementById("fr-" + id);
+  if (!food || gr <= 0) {
+    res.innerHTML = "<div style='color:#444;font-size:12px;text-align:center;padding:8px'>Elige un alimento e introduce los gramos</div>";
+    return;
+  }
+  var f = gr / 100;
+  var kcal = r1(food.k * f);
+  var p = r1(food.p * f);
+  var c = r1(food.c * f);
+  var g = r1(food.g * f);
+  var pt = pcts({p:p, c:c, g:g});
+  res.innerHTML =
+    "<div class='calc-result-row'><span class='calc-result-label'>Calorias</span><span style='font-weight:700;color:#C8F135'>" + kcal + " kcal</span></div>" +
+    "<div class='calc-result-row'><span class='calc-result-label'>Proteina</span><span style='font-weight:700;color:#FF6B6B'>" + p + "g <small style='color:#555'>(" + pt.p + "%)</small></span></div>" +
+    "<div class='calc-result-row'><span class='calc-result-label'>Carbohidratos</span><span style='font-weight:700;color:#4DC9FF'>" + c + "g <small style='color:#555'>(" + pt.c + "%)</small></span></div>" +
+    "<div class='calc-result-row'><span class='calc-result-label'>Grasas</span><span style='font-weight:700;color:#FFD166'>" + g + "g <small style='color:#555'>(" + pt.g + "%)</small></span></div>";
+}
+
+function render() {
+  var d = P[person][day];
+  var eaten = loadEaten();
+
+  document.getElementById("s-kcal").textContent = d.kcal;
+  document.getElementById("s-def").textContent = d.def;
+  document.getElementById("s-prot").textContent = d.prot;
+  document.getElementById("s-unit").textContent = d.unit;
+  document.getElementById("footer-note").innerHTML = "TDEE ~" + d.tdee + " kcal &middot; Proteinas en peso crudo";
+
+  var pt = pcts(d.macros);
+  document.getElementById("macro-bar").innerHTML =
+    "<div style='width:" + pt.p + "%;background:#FF6B6B;border-radius:4px 0 0 4px;transition:width .3s'></div>" +
+    "<div style='width:" + pt.c + "%;background:#4DC9FF;transition:width .3s'></div>" +
+    "<div style='width:" + pt.g + "%;background:#FFD166;border-radius:0 4px 4px 0;transition:width .3s'></div>";
+  document.getElementById("ml-p").textContent = d.macros.p + "g (" + pt.p + "%)";
+  document.getElementById("ml-c").textContent = d.macros.c + "g (" + pt.c + "%)";
+  document.getElementById("ml-g").textContent = d.macros.g + "g (" + pt.g + "%)";
+
+  var tKcal = 0, tP = 0, tC = 0, tG = 0;
+  d.meals.forEach(function(m) {
+    if (eaten[m.id]) { tKcal += m.kcal; tP += m.macros.p; tC += m.macros.c; tG += m.macros.g; }
+  });
+  var tot = d.meals.reduce(function(a, m) { return a + m.kcal; }, 0);
+  var pctVal = tot > 0 ? Math.min(100, Math.round(tKcal / tot * 100)) : 0;
+  document.getElementById("tr-pct").textContent = pctVal + "%";
+  document.getElementById("tr-fill").style.width = pctVal + "%";
+  document.getElementById("tr-kcal").textContent = fmt(tKcal) + " / " + fmt(tot) + " kcal";
+  document.getElementById("tr-p").textContent = tP + "/" + d.macros.p + "g";
+  document.getElementById("tr-c").textContent = tC + "/" + d.macros.c + "g";
+  document.getElementById("tr-g").textContent = tG + "/" + d.macros.g + "g";
+
+  var html = "";
+  d.meals.forEach(function(meal, i) {
+    var mp = pcts(meal.macros);
+    var isOpen = openMeal === i;
+    var isEaten = !!eaten[meal.id];
+    var isPre = !!meal.preWorkout;
+    var cls = "meal-card" + (isOpen ? " open" : "") + (isEaten ? " eaten" : "") + (isPre ? " pre-workout" : "");
+
+    html += "<div class='" + cls + "'>";
+
+    // Header: DIV not button — fixes nested button bug
+    html += "<div class='meal-header' onclick='toggleMeal(" + i + ")'>";
+    html += "<div class='meal-icon'>" + meal.icon + "</div>";
+    html += "<div style='flex:1'><div class='meal-time'>" + meal.time + "</div><div class='meal-name'>" + meal.name + "</div></div>";
+    html += "<div class='meal-right'>";
+    html += "<div><div class='meal-kcal'>" + meal.kcal + "</div><div class='meal-kcal-unit'>kcal</div></div>";
+    html += "<button class='eat-btn' onclick='event.stopPropagation();toggleEat(\"" + meal.id + "\")'>" + (isEaten ? "&#10003;" : "&#9711;") + "</button>";
+    html += "<span class='chevron'>&#9662;</span>";
+    html += "</div></div>";
+
+    // Mini bar
+    html += "<div class='mini-bar-wrap'><div style='width:" + mp.p + "%;background:#FF6B6B'></div><div style='width:" + mp.c + "%;background:#4DC9FF'></div><div style='width:" + mp.g + "%;background:#FFD166'></div></div>";
+
+    // Body
+    html += "<div class='meal-body'>";
+    html += "<div class='macro-pills'>" +
+      "<div class='macro-pill'><div class='pill-label'>Proteina</div><div class='pill-val' style='color:#FF6B6B'>" + meal.macros.p + "g</div></div>" +
+      "<div class='macro-pill'><div class='pill-label'>Carbs</div><div class='pill-val' style='color:#4DC9FF'>" + meal.macros.c + "g</div></div>" +
+      "<div class='macro-pill'><div class='pill-label'>Grasas</div><div class='pill-val' style='color:#FFD166'>" + meal.macros.g + "g</div></div>" +
+      "</div>";
+    meal.items.forEach(function(it) { html += "<div class='item-row'><div class='item-dot'></div><span>" + it + "</span></div>"; });
+    html += "<div class='tip-box'>&#128161; " + meal.tip + "</div>";
+
+    // Substitutions accordion
+    var sOpen = !!openSubs[meal.id];
+    html += "<button class='acc-btn' onclick='event.stopPropagation();toggleSubs(\"" + meal.id + "\")'>&#8652;&nbsp;Sustituciones <span>" + (sOpen ? "&#9650;" : "&#9660;") + "</span></button>";
+    html += "<div class='acc-body" + (sOpen ? " open" : "") + "'>";
+    meal.subs.forEach(function(sg) {
+      html += "<div class='sub-group'><div class='sub-group-label'>" + sg.label + "</div>";
+      sg.opts.forEach(function(o) { html += "<div class='sub-opt'>" + o + "</div>"; });
+      html += "</div>";
+    });
+    html += "</div>";
+
+    // Food calculator accordion
+    var cOpen = !!openCalc[meal.id];
+    html += "<button class='acc-btn' style='border-color:#C8F13540;color:#C8F13599' onclick='event.stopPropagation();toggleCalc(\"" + meal.id + "\")'>&#128290;&nbsp;Calcular alimento <span>" + (cOpen ? "&#9650;" : "&#9660;") + "</span></button>";
+    html += "<div class='acc-body" + (cOpen ? " open" : "") + "'>";
+    html += "<div class='calc-row'>" +
+      "<div class='calc-field'><div class='calc-label'>Alimento</div><input class='calc-input' id='fi-" + meal.id + "' list='food-list' placeholder='Escribe para buscar...' oninput='calcFood(\"" + meal.id + "\")'></div>" +
+      "<div class='calc-field calc-gram'><div class='calc-label'>Gramos</div><input class='calc-input' id='fg-" + meal.id + "' type='number' min='1' max='1000' placeholder='0' oninput='calcFood(\"" + meal.id + "\")'></div>" +
+      "</div>";
+    html += "<div class='calc-result' id='fr-" + meal.id + "'><div style='color:#444;font-size:12px;text-align:center;padding:8px'>Elige un alimento e introduce los gramos</div></div>";
+    html += "</div>";
+
+    html += "</div></div>";
+  });
+
+  document.getElementById("meals-container").innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
