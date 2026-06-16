@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<meta name="theme-color" content="#0C0C0C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Plan Entreno">
+<title>Plan de Entrenamiento</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0C0C0C;color:#F0F0F0;padding:20px 16px 110px;min-height:100vh;max-width:520px;margin:0 auto}
+.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#C8F135;font-weight:700;margin-bottom:6px}
+h1{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.subtitle{font-size:12px;color:#666;margin-bottom:18px}
+.person-wrap{display:flex;gap:8px;margin-bottom:14px}
+.person-btn{flex:1;padding:10px;border:1px solid #252525;border-radius:10px;background:#161616;color:#666;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+.person-btn.active{border-color:#C8F135;color:#F0F0F0;background:#1A1A1A}
+.avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.person-btn.active .avatar{background:#C8F135;color:#000}
+.person-btn:not(.active) .avatar{background:#2A2A2A;color:#555}
+.days-wrap{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;padding-bottom:2px}
+.days-wrap::-webkit-scrollbar{display:none}
+.day-btn{flex-shrink:0;padding:8px 14px;border:1px solid #252525;border-radius:8px;background:#161616;color:#666;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.day-btn.active{background:#C8F135;color:#000;border-color:#C8F135}
+.day-btn.done-day{border-color:#2A2A2A;color:#333;position:relative}
+.day-btn.done-day::after{content:"✓";position:absolute;top:-4px;right:-4px;background:#3A3A2A;color:#C8F135;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center}
+.session-header{background:#161616;border:1px solid #252525;border-radius:12px;padding:16px;margin-bottom:14px}
+.session-tag{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#C8F135;font-weight:700;margin-bottom:4px}
+.session-name{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.session-muscles{font-size:12px;color:#666}
+.session-done-badge{display:inline-flex;align-items:center;gap:5px;background:#1A2A0A;border:1px solid #3A5A1A;border-radius:6px;padding:4px 10px;font-size:11px;color:#8BC34A;margin-top:8px}
+.exs-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.ex-card{background:#161616;border:1px solid #252525;border-radius:12px;overflow:hidden;transition:border-color .15s}
+.ex-card.open{border-color:rgba(200,241,53,.4)}
+.ex-card.completed{opacity:.6}
+.ex-card.completed .ex-name{text-decoration:line-through;color:#555}
+.ex-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.ex-type-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ex-info{flex:1}
+.ex-name{font-size:14px;font-weight:700;line-height:1.3;margin-bottom:3px}
+.ex-muscle{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.08em}
+.ex-badge{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ex-sets{font-size:13px;font-weight:800;color:#F0F0F0;text-align:right}
+.ex-reps{font-size:10px;color:#666;text-align:right}
+.done-btn{width:30px;height:30px;border-radius:7px;border:1px solid #2A2A2A;background:transparent;color:#444;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.ex-card.completed .done-btn{background:#C8F13520;border-color:#C8F135;color:#C8F135}
+.chevron{font-size:12px;color:#333;margin-left:2px;transition:transform .2s;flex-shrink:0}
+.ex-card.open .chevron{transform:rotate(180deg)}
+.ex-body{display:none;padding:0 14px 14px}
+.ex-card.open .ex-body{display:block}
+.ex-stats{display:flex;gap:8px;margin-bottom:12px}
+.ex-stat{flex:1;background:#1A1A1A;border-radius:8px;padding:8px;text-align:center}
+.ex-stat-label{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.ex-stat-val{font-size:14px;font-weight:800}
+.ex-note{background:#111;border-left:3px solid #252525;border-radius:0 8px 8px 0;padding:9px 12px;font-size:12px;color:#777;line-height:1.5}
+.ex-card.open .ex-note{border-left-color:#C8F135}
+.sets-track{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.set-pill{width:36px;height:36px;border-radius:8px;border:1px solid #2A2A2A;background:transparent;color:#555;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.set-pill.done{background:#C8F13525;border-color:#C8F135;color:#C8F135}
+.set-label{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-weight:700}
+.tracker{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #222;padding:10px 16px 14px;z-index:50;max-width:520px;margin:0 auto}
+.tracker-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.tracker-pct{font-size:20px;font-weight:800;color:#C8F135;flex-shrink:0;width:48px}
+.tracker-bar-wrap{flex:1}
+.tracker-bar-bg{height:6px;background:#222;border-radius:3px;overflow:hidden}
+.tracker-bar-fill{height:100%;background:#C8F135;border-radius:3px;transition:width .3s}
+.tracker-info{font-size:11px;color:#666;margin-top:3px}
+.tracker-reset{background:none;border:1px solid #252525;border-radius:7px;padding:6px 10px;color:#555;font-size:11px;cursor:pointer;flex-shrink:0}
+.tracker-row2{display:flex;gap:14px}
+.tstat{display:flex;align-items:center;gap:5px;font-size:11px}
+.tstat-l{font-weight:700;color:#888}
+.tstat-v{color:#555}
+</style>
+</head>
+<body>
+
+<div class="eyebrow">PPL — Semana actual</div>
+<h1>Plan de entrenamiento</h1>
+<p class="subtitle">Series &middot; Repeticiones &middot; Descanso &middot; Técnica</p>
+
+<div class="person-wrap">
+  <button class="person-btn active" onclick="setPerson('borja')"><div class="avatar">B</div>Borja</button>
+  <button class="person-btn" onclick="setPerson('lurdes')"><div class="avatar">L</div>Lurdes</button>
+</div>
+
+<div class="days-wrap" id="days-wrap"></div>
+
+<div id="session-header"></div>
+<div class="exs-wrap" id="exs-container"></div>
+
+<div class="tracker">
+  <div class="tracker-top">
+    <div class="tracker-pct" id="tr-pct">0%</div>
+    <div class="tracker-bar-wrap">
+      <div class="tracker-bar-bg"><div class="tracker-bar-fill" id="tr-fill" style="width:0%"></div></div>
+      <div class="tracker-info" id="tr-info">0 / 0 ejercicios completados</div>
+    </div>
+    <button class="tracker-reset" onclick="resetDay()">&#8635; Reset</button>
+  </div>
+  <div class="tracker-row2">
+    <div class="tstat"><span class="tstat-l">Series&nbsp;</span><span class="tstat-v" id="tr-sets">0/0</span></div>
+    <div class="tstat"><span class="tstat-l">Ejercicios&nbsp;</span><span class="tstat-v" id="tr-exs">0/0</span></div>
+  </div>
+</div>
+
+<script>
+var W = {"borja": {"mon": {"name": "Pull A", "subtitle": "Espalda", "muscles": "Espalda \u00b7 Dorsales \u00b7 Trapecio", "done": true, "exercises": [{"id": "m1", "name": "Dominadas o Jalon al pecho agarre prono", "type": "compound", "sets": 4, "reps": "6-8", "rest": "3 min", "muscle": "Dorsal", "note": "Agarre ligeramente mas ancho que hombros. Tira hacia la clavicula. Mant\u00e9n el torso ligeramente inclinado atras."}, {"id": "m2", "name": "Remo con barra (o mancuerna unilateral)", "type": "compound", "sets": 4, "reps": "8-10", "rest": "2-3 min", "muscle": "Espalda", "note": "Espalda recta, esc\u00e1pulas atras en la contraccion. Pausa 1 seg con los codos atras."}, {"id": "m3", "name": "Remo en polea sentado (cable row)", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Espalda", "note": "Tira con los codos, no con las manos. Pausa final con esc\u00e1pulas juntas."}, {"id": "m4", "name": "Pullover en polea o con mancuerna", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Dorsal", "note": "Activa el dorsal largo. Brazos casi extendidos, codos ligeramente doblados."}, {"id": "m5", "name": "Remo al ment\u00f3n con mancuernas", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Trapecio", "note": "Codos por encima de las manos al subir. Activa trapecio medio e infraespinoso."}]}, "tue": {"name": "Push A", "subtitle": "Pecho heavy", "muscles": "Pecho \u00b7 Hombros \u00b7 Triceps", "done": false, "exercises": [{"id": "t1", "name": "Press banca plano \u2014 barra", "type": "compound", "sets": 4, "reps": "6-8", "rest": "3 min", "muscle": "Pecho", "note": "Esc\u00e1pulas retraidas y bajadas. Baja controlado 2 seg hasta rozar el estern\u00f3n. No hagas rebote. Pies en el suelo."}, {"id": "t2", "name": "Press inclinado \u2014 mancuernas (30-45\u00b0)", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Pecho superior", "note": "El \u00e1ngulo inclinado activa la parte superior del pectoral. Codo a 75\u00b0 del torso, no a 90\u00b0."}, {"id": "t3", "name": "Aperturas en polea cruzada (cable crossover)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Pecho", "note": "Ligera flexion de codo fija todo el recorrido. Contrae el pectoral al final y mant\u00e9n 1 seg."}, {"id": "t4", "name": "Press militar mancuernas (sentado)", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Hombros", "note": "No arquees la lumbar. Empuja arriba y ligeramente hacia adentro en la parte alta."}, {"id": "t5", "name": "Elevaciones laterales \u2014 mancuernas", "type": "isolation", "sets": 4, "reps": "15-20", "rest": "60 seg", "muscle": "Deltoides lateral", "note": "Ligeramente inclinado adelante, codo ligeramente doblado fijo. Sube hasta la altura del hombro, baja en 3 segundos."}, {"id": "t6", "name": "Pushdown en polea alta (triceps)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Triceps", "note": "Codos pegados al cuerpo, fijos. Solo se mueve el antebrazo. Contracci\u00f3n completa abajo."}, {"id": "t7", "name": "Extension triceps sobre la cabeza", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Triceps largo", "note": "Codos apuntando al techo, fijos. Estira el cabeza larga del triceps que cruza el hombro."}]}, "wed": {"name": "Legs", "subtitle": "Cuad + Isquios + Gluteo", "muscles": "Cuadriceps \u00b7 Isquiosurales \u00b7 Gluteo \u00b7 Gemelos", "done": false, "exercises": [{"id": "w1", "name": "Sentadilla libre (o Hack squat)", "type": "compound", "sets": 4, "reps": "8-10", "rest": "3 min", "muscle": "Cuadriceps", "note": "Borja: si la espalda molesta usa hack squat o Smith. Profundidad hasta muslos paralelos al suelo. Core activo siempre."}, {"id": "w2", "name": "Peso muerto rumano \u2014 barra", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2-3 min", "muscle": "Isquios + Gluteo", "note": "Espalda NEUTRA siempre. Empuja caderas hacia atras, no hacia abajo. La barra roza las piernas en todo el recorrido."}, {"id": "w3", "name": "Hip thrust en banco \u2014 barra", "type": "compound", "sets": 4, "reps": "10-12", "rest": "2 min", "muscle": "Gluteo", "note": "Hombros apoyados en banco, barra en cadera con protector. Aprieta gluteo arriba y mant\u00e9n 2 segundos."}, {"id": "w4", "name": "Prensa 45\u00b0", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Cuad + Gluteo", "note": "Pies en la parte alta de la plataforma = mas gluteo. Pies abajo = mas cuadriceps."}, {"id": "w5", "name": "Curl femoral tumbado (maquina)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Isquiosurales", "note": "Plantilla flexionada, no en punta. Contraccion completa abajo, baja controlado."}, {"id": "w6", "name": "Extension de cuadriceps (maquina)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Cuadriceps", "note": "Recorrido completo. Aguanta 1 seg arriba. No para aislar el caud en deficit, hazlo al final."}, {"id": "w7", "name": "Elevacion de pantorrillas", "type": "isolation", "sets": 4, "reps": "15-20", "rest": "60 seg", "muscle": "Gemelos", "note": "Recorrido completo: talon abajo del todo, puntas arriba del todo. Sin rebote en la parte baja."}]}, "thu": {"name": "Pull B", "subtitle": "Biceps + Espalda accesorio + Core", "muscles": "Biceps \u00b7 Espalda \u00b7 Hombro posterior \u00b7 Core", "done": false, "exercises": [{"id": "h1", "name": "Jalon al pecho agarre supino (biceps + dorsal)", "type": "compound", "sets": 4, "reps": "8-10", "rest": "2 min", "muscle": "Dorsal + Biceps", "note": "Agarre a la anchura de hombros o mas estrecho. Activa dorsal y biceps a la vez."}, {"id": "h2", "name": "Curl con barra Z (EZ bar)", "type": "compound", "sets": 4, "reps": "10-12", "rest": "90 seg", "muscle": "Biceps", "note": "Sin balanceo de torso. Si te balanceas el peso es demasiado. Codos fijos pegados al cuerpo."}, {"id": "h3", "name": "Curl martillo \u2014 mancuernas", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Braquial", "note": "Pulgar arriba, movimiento neutro. Activa el braquial y braquiorradial ademas del biceps."}, {"id": "h4", "name": "Curl concentrado o Curl ara\u00f1a", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Pico biceps", "note": "Maxima contraccion. Supina la muneca al subir para activar el pico del biceps."}, {"id": "h5", "name": "Face pull en polea \u2014 cuerda", "type": "isolation", "sets": 3, "reps": "15-20", "rest": "60 seg", "muscle": "Hombro posterior", "note": "Cuerda a la altura de los ojos. Tira hacia la cara, codos arriba y atras. Clave para la postura en moto."}, {"id": "h6", "name": "Remo al pecho en polea (cable row alto)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Trapecio medio", "note": "Sentado en el suelo o de pie. Tira hacia el esternon, esc\u00e1pulas juntas."}, {"id": "h7", "name": "Plancha abdominal", "type": "core", "sets": 3, "reps": "45-60s", "rest": "60 seg", "muscle": "Core", "note": "Caderas neutras, no dejes caer la pelvis. Activa gluteo y core al mismo tiempo."}, {"id": "h8", "name": "Crunch en polea", "type": "core", "sets": 3, "reps": "15-20", "rest": "60 seg", "muscle": "Abdominales", "note": "La contraccion viene del abdomen, no de flexionar la cadera. Rodillas en el suelo."}]}, "fri": {"name": "Push B", "subtitle": "Hombros heavy", "muscles": "Hombros \u00b7 Pecho \u00b7 Triceps", "done": false, "exercises": [{"id": "fb1", "name": "Press Arnold \u2014 mancuernas (sentado)", "type": "compound", "sets": 4, "reps": "8-10", "rest": "3 min", "muscle": "Hombros", "note": "Empieza con palmas hacia ti, rota mientras subes. Activa los 3 haces del deltoides en un solo ejercicio."}, {"id": "fb2", "name": "Elevaciones laterales en polea (cable lateral raise)", "type": "isolation", "sets": 4, "reps": "15-20", "rest": "60 seg", "muscle": "Deltoides lateral", "note": "La polea da tension constante a diferencia de la mancuerna. Codo ligeramente doblado y fijo."}, {"id": "fb3", "name": "Pajaro en polea o mancuernas inclinado (reverse fly)", "type": "isolation", "sets": 3, "reps": "15-20", "rest": "60 seg", "muscle": "Deltoides posterior", "note": "Clave para equilibrio del hombro y postura. Esencial si montas en moto con frecuencia."}, {"id": "fb4", "name": "Press banca inclinado \u2014 mancuernas", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Pecho superior", "note": "Segunda exposicion al pecho superior esta semana. Menos peso que el martes."}, {"id": "fb5", "name": "Dips en paralelas", "type": "compound", "sets": 3, "reps": "10-12", "rest": "90 seg", "muscle": "Pecho + Triceps", "note": "Torso inclinado adelante = mas pectoral. Torso recto = mas triceps."}, {"id": "fb6", "name": "Extension triceps unilateral \u2014 mancuerna", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Triceps", "note": "Un brazo a la vez para corregir asimetrias. Codo fijo apuntando al techo."}]}}, "lurdes": {"mon": {"name": "Pull A", "subtitle": "Espalda", "muscles": "Espalda \u00b7 Dorsales \u00b7 Trapecio", "done": true, "exercises": [{"id": "m1", "name": "Dominadas o Jalon al pecho agarre prono", "type": "compound", "sets": 4, "reps": "6-8", "rest": "3 min", "muscle": "Dorsal", "note": "Agarre ligeramente mas ancho que hombros. Tira hacia la clavicula. Mant\u00e9n el torso ligeramente inclinado atras."}, {"id": "m2", "name": "Remo con barra (o mancuerna unilateral)", "type": "compound", "sets": 4, "reps": "8-10", "rest": "2-3 min", "muscle": "Espalda", "note": "Espalda recta, esc\u00e1pulas atras en la contraccion. Pausa 1 seg con los codos atras."}, {"id": "m3", "name": "Remo en polea sentado (cable row)", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Espalda", "note": "Tira con los codos, no con las manos. Pausa final con esc\u00e1pulas juntas."}, {"id": "m4", "name": "Pullover en polea o con mancuerna", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Dorsal", "note": "Activa el dorsal largo. Brazos casi extendidos, codos ligeramente doblados."}, {"id": "m5", "name": "Remo al ment\u00f3n con mancuernas", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Trapecio", "note": "Codos por encima de las manos al subir. Activa trapecio medio e infraespinoso."}]}, "tue": {"name": "Push A", "subtitle": "Pecho heavy", "muscles": "Pecho \u00b7 Hombros \u00b7 Triceps", "done": false, "exercises": [{"id": "t1", "name": "Press banca plano \u2014 barra", "type": "compound", "sets": 4, "reps": "6-8", "rest": "3 min", "muscle": "Pecho", "note": "Esc\u00e1pulas retraidas y bajadas. Baja controlado 2 seg hasta rozar el estern\u00f3n. No hagas rebote. Pies en el suelo."}, {"id": "t2", "name": "Press inclinado \u2014 mancuernas (30-45\u00b0)", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Pecho superior", "note": "El \u00e1ngulo inclinado activa la parte superior del pectoral. Codo a 75\u00b0 del torso, no a 90\u00b0."}, {"id": "t3", "name": "Aperturas en polea cruzada (cable crossover)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Pecho", "note": "Ligera flexion de codo fija todo el recorrido. Contrae el pectoral al final y mant\u00e9n 1 seg."}, {"id": "t4", "name": "Press militar mancuernas (sentado)", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Hombros", "note": "No arquees la lumbar. Empuja arriba y ligeramente hacia adentro en la parte alta."}, {"id": "t5", "name": "Elevaciones laterales \u2014 mancuernas", "type": "isolation", "sets": 4, "reps": "15-20", "rest": "60 seg", "muscle": "Deltoides lateral", "note": "Ligeramente inclinado adelante, codo ligeramente doblado fijo. Sube hasta la altura del hombro, baja en 3 segundos."}, {"id": "t6", "name": "Pushdown en polea alta (triceps)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Triceps", "note": "Codos pegados al cuerpo, fijos. Solo se mueve el antebrazo. Contracci\u00f3n completa abajo."}, {"id": "t7", "name": "Extension triceps sobre la cabeza", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Triceps largo", "note": "Codos apuntando al techo, fijos. Estira el cabeza larga del triceps que cruza el hombro."}]}, "wed": {"name": "Legs", "subtitle": "Cuad + Isquios + Gluteo", "muscles": "Cuadriceps \u00b7 Isquiosurales \u00b7 Gluteo \u00b7 Gemelos", "done": false, "exercises": [{"id": "w1", "name": "Sentadilla libre (o Hack squat)", "type": "compound", "sets": 4, "reps": "8-10", "rest": "3 min", "muscle": "Cuadriceps", "note": "Borja: si la espalda molesta usa hack squat o Smith. Profundidad hasta muslos paralelos al suelo. Core activo siempre."}, {"id": "w2", "name": "Peso muerto rumano \u2014 barra", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2-3 min", "muscle": "Isquios + Gluteo", "note": "Espalda NEUTRA siempre. Empuja caderas hacia atras, no hacia abajo. La barra roza las piernas en todo el recorrido."}, {"id": "w3", "name": "Hip thrust en banco \u2014 barra", "type": "compound", "sets": 4, "reps": "10-12", "rest": "2 min", "muscle": "Gluteo", "note": "Hombros apoyados en banco, barra en cadera con protector. Aprieta gluteo arriba y mant\u00e9n 2 segundos."}, {"id": "w4", "name": "Prensa 45\u00b0", "type": "compound", "sets": 3, "reps": "10-12", "rest": "2 min", "muscle": "Cuad + Gluteo", "note": "Pies en la parte alta de la plataforma = mas gluteo. Pies abajo = mas cuadriceps."}, {"id": "w5", "name": "Curl femoral tumbado (maquina)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Isquiosurales", "note": "Plantilla flexionada, no en punta. Contraccion completa abajo, baja controlado."}, {"id": "w6", "name": "Extension de cuadriceps (maquina)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Cuadriceps", "note": "Recorrido completo. Aguanta 1 seg arriba. No para aislar el caud en deficit, hazlo al final."}, {"id": "w7", "name": "Elevacion de pantorrillas", "type": "isolation", "sets": 4, "reps": "15-20", "rest": "60 seg", "muscle": "Gemelos", "note": "Recorrido completo: talon abajo del todo, puntas arriba del todo. Sin rebote en la parte baja."}]}, "thu": {"name": "Pull B", "subtitle": "Biceps + Espalda accesorio + Core", "muscles": "Biceps \u00b7 Espalda \u00b7 Hombro posterior \u00b7 Core", "done": false, "exercises": [{"id": "h1", "name": "Jalon al pecho agarre supino (biceps + dorsal)", "type": "compound", "sets": 4, "reps": "8-10", "rest": "2 min", "muscle": "Dorsal + Biceps", "note": "Agarre a la anchura de hombros o mas estrecho. Activa dorsal y biceps a la vez."}, {"id": "h2", "name": "Curl con barra Z (EZ bar)", "type": "compound", "sets": 4, "reps": "10-12", "rest": "90 seg", "muscle": "Biceps", "note": "Sin balanceo de torso. Si te balanceas el peso es demasiado. Codos fijos pegados al cuerpo."}, {"id": "h3", "name": "Curl martillo \u2014 mancuernas", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Braquial", "note": "Pulgar arriba, movimiento neutro. Activa el braquial y braquiorradial ademas del biceps."}, {"id": "h4", "name": "Curl concentrado o Curl ara\u00f1a", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Pico biceps", "note": "Maxima contraccion. Supina la muneca al subir para activar el pico del biceps."}, {"id": "h5", "name": "Face pull en polea \u2014 cuerda", "type": "isolation", "sets": 3, "reps": "15-20", "rest": "60 seg", "muscle": "Hombro posterior", "note": "Cuerda a la altura de los ojos. Tira hacia la cara, codos arriba y atras. Clave para la postura en moto."}, {"id": "h6", "name": "Remo al pecho en polea (cable row alto)", "type": "isolation", "sets": 3, "reps": "12-15", "rest": "60 seg", "muscle": "Trapecio medio", "note": "Sentado en el suelo o de pie. Tira hacia el esternon, esc\u00e1pulas juntas."}, {"id": "h7", "name": "Plancha abdominal", "type": "core", "sets": 3, "reps": "45-60s", "rest": "60 seg", "muscle": "Core", "note": "Caderas neutras, no dejes caer la pelvis. Activa gluteo y core al mismo tiempo."}, {"id": "h8", "name": "Crunch en polea", "type": "core", "sets": 3, "reps": "15-20", "rest": "60 seg", "muscle": "Abdominales", "note": "La contraccion viene del abdomen, no de flexionar la cadera. Rodillas en el suelo."}]}, "fri": {"name": "Gluteo", "subtitle": "Dia especifico gluteo", "muscles": "Gluteo mayor \u00b7 Gluteo medio \u00b7 Isquiosurales", "done": false, "exercises": [{"id": "fl1", "name": "Hip thrust barra", "type": "compound", "sets": 5, "reps": "10-12", "rest": "2 min", "muscle": "Gluteo mayor", "note": "EL ejercicio rey del gluteo. Barra en cadera con protector. Aprieta fuerte arriba, 2 segundos de contraccion. Chin tucked."}, {"id": "fl2", "name": "Sentadilla bulgara \u2014 mancuernas (Bulgarian split squat)", "type": "compound", "sets": 4, "reps": "10-12c/p", "rest": "90 seg", "muscle": "Gluteo + Cuad", "note": "Pie trasero elevado en banco. La rodilla delantera NO pasa de la punta del pie. Enfoca el descenso en el gluteo de la pierna delantera."}, {"id": "fl3", "name": "Peso muerto rumano \u2014 mancuernas", "type": "compound", "sets": 3, "reps": "12-15", "rest": "90 seg", "muscle": "Isquios + Gluteo inferior", "note": "Espalda neutra siempre. Siente el estiramiento en el isquiosural. Activa gluteo en la subida."}, {"id": "fl4", "name": "Patada de gluteo en polea (cable kickback)", "type": "isolation", "sets": 3, "reps": "15c/p", "rest": "60 seg", "muscle": "Gluteo mayor", "note": "Agarre en el tobillo. Sube la pierna extendida, aprieta el gluteo arriba. Sin rotar la cadera."}, {"id": "fl5", "name": "Abductor en maquina", "type": "isolation", "sets": 4, "reps": "15-20", "rest": "60 seg", "muscle": "Gluteo medio", "note": "Fundamental para la forma lateral del gluteo. Pausa en la apertura maxima 1-2 segundos."}, {"id": "fl6", "name": "Hip thrust unilateral en banco", "type": "isolation", "sets": 3, "reps": "12c/p", "rest": "60 seg", "muscle": "Gluteo (unilateral)", "note": "Version de una sola pierna: mas activacion y corrige asimetrias. Hombros en el banco."}, {"id": "fl7", "name": "Monster walk con banda elastica", "type": "activation", "sets": 3, "reps": "15 pasos", "rest": "60 seg", "muscle": "Gluteo medio", "note": "Banda en rodillas o por encima. Pasos laterales sin que las rodillas se junten. Activa el gluteo medio directamente."}]}}};
+
+var DAYS = [
+  {key:"mon", label:"Lun", full:"Lunes"},
+  {key:"tue", label:"Mar", full:"Martes"},
+  {key:"wed", label:"Mié", full:"Miércoles"},
+  {key:"thu", label:"Jue", full:"Jueves"},
+  {key:"fri", label:"Vie", full:"Viernes"},
+];
+
+var TYPE_COLOR = {compound:"#C8F135", isolation:"#4DC9FF", core:"#FF8C69", activation:"#FFD166"};
+var TYPE_LABEL = {compound:"Compuesto", isolation:"Aislamiento", core:"Core", activation:"Activación"};
+
+var person = "borja";
+var curDay = "tue"; // default to today (Tuesday)
+var openEx = null;
+
+function getDoneKey() { return "exdone_" + person + "_" + curDay + "_" + new Date().toISOString().split("T")[0]; }
+function getSetKey()  { return "setdone_" + person + "_" + curDay + "_" + new Date().toISOString().split("T")[0]; }
+function loadDone()  { try { return JSON.parse(localStorage.getItem(getDoneKey())) || {}; } catch(e) { return {}; } }
+function saveDone(d) { localStorage.setItem(getDoneKey(), JSON.stringify(d)); }
+function loadSets()  { try { return JSON.parse(localStorage.getItem(getSetKey()))  || {}; } catch(e) { return {}; } }
+function saveSets(s) { localStorage.setItem(getSetKey(), JSON.stringify(s)); }
+
+function setPerson(p) {
+  person = p; openEx = null;
+  document.querySelectorAll(".person-btn").forEach(function(b,i){ b.classList.toggle("active",(i===0&&p==="borja")||(i===1&&p==="lurdes")); });
+  render();
+}
+function setDay(d) { curDay = d; openEx = null; render(); }
+function toggleEx(id) { openEx = openEx === id ? null : id; render(); }
+
+function toggleDone(id) {
+  var d = loadDone(); d[id] = !d[id];
+  if (!d[id]) { var s = loadSets(); delete s[id]; saveSets(s); }
+  saveDone(d); render();
+}
+function toggleSet(exId, setIdx) {
+  var s = loadSets();
+  if (!s[exId]) s[exId] = {};
+  s[exId][setIdx] = !s[exId][setIdx];
+  saveSets(s);
+  // Auto-complete exercise when all sets done
+  var ex = W[person][curDay].exercises.filter(function(e){return e.id===exId;})[0];
+  if (ex) {
+    var done = Object.values(s[exId]).filter(Boolean).length;
+    var d = loadDone();
+    d[exId] = (done >= ex.sets);
+    saveDone(d);
+  }
+  render();
+}
+function resetDay() {
+  localStorage.removeItem(getDoneKey());
+  localStorage.removeItem(getSetKey());
+  render();
+}
+
+function render() {
+  var session = W[person][curDay];
+  var done = loadDone();
+  var sets = loadSets();
+
+  // Day tabs
+  var daysHtml = "";
+  DAYS.forEach(function(d) {
+    var s = W[person][d.key];
+    var isActive = d.key === curDay;
+    var isDone = s && s.done;
+    var cls = "day-btn" + (isActive?" active":"") + (isDone&&!isActive?" done-day":"");
+    daysHtml += "<button class='"+cls+"' onclick='setDay(\""+d.key+"\")'>"+d.label+(s?" · "+s.name:"")+"</button>";
+  });
+  document.getElementById("days-wrap").innerHTML = daysHtml;
+
+  if (!session) { document.getElementById("session-header").innerHTML = ""; document.getElementById("exs-container").innerHTML = ""; return; }
+
+  // Session header
+  var hdHtml = "<div class='session-header'>";
+  hdHtml += "<div class='session-tag'>"+session.name+"</div>";
+  hdHtml += "<div class='session-name'>"+session.subtitle+"</div>";
+  hdHtml += "<div class='session-muscles'>"+session.muscles+"</div>";
+  if (session.done) hdHtml += "<div class='session-done-badge'>&#10003;&nbsp;Sesion completada</div>";
+  hdHtml += "</div>";
+  document.getElementById("session-header").innerHTML = hdHtml;
+
+  // Exercises
+  var totalExs = session.exercises.length;
+  var doneExs = 0, doneSets = 0, totalSets = 0;
+
+  var exHtml = "";
+  session.exercises.forEach(function(ex) {
+    var isOpen = openEx === ex.id;
+    var isDone = !!done[ex.id];
+    var exSets = sets[ex.id] || {};
+    var doneSetsEx = Object.values(exSets).filter(Boolean).length;
+    if (isDone) doneExs++;
+    doneSets += doneSetsEx;
+    totalSets += ex.sets;
+
+    var cls = "ex-card" + (isOpen?" open":"") + (isDone?" completed":"");
+    var col = TYPE_COLOR[ex.type] || "#888";
+
+    exHtml += "<div class='"+cls+"'>";
+    exHtml += "<div class='ex-header' onclick='toggleEx(\""+ex.id+"\")'>";
+    exHtml += "<div class='ex-type-dot' style='background:"+col+"'></div>";
+    exHtml += "<div class='ex-info'><div class='ex-name'>"+ex.name+"</div><div class='ex-muscle'>"+ex.muscle+"&nbsp;·&nbsp;"+(TYPE_LABEL[ex.type]||ex.type)+"</div></div>";
+    exHtml += "<div class='ex-badge'>";
+    exHtml += "<div style='text-align:right'><div class='ex-sets'>"+ex.sets+"×"+ex.reps+"</div><div class='ex-reps'>"+ex.rest+"</div></div>";
+    exHtml += "<button class='done-btn' onclick='event.stopPropagation();toggleDone(\""+ex.id+"\")'>"+(isDone?"&#10003;":"&#9711;")+"</button>";
+    exHtml += "</div>";
+    exHtml += "<span class='chevron'>&#9662;</span>";
+    exHtml += "</div>";
+
+    exHtml += "<div class='ex-body'>";
+    exHtml += "<div class='ex-stats'>";
+    exHtml += "<div class='ex-stat'><div class='ex-stat-label'>Series</div><div class='ex-stat-val' style='color:"+col+"'>"+ex.sets+"</div></div>";
+    exHtml += "<div class='ex-stat'><div class='ex-stat-label'>Reps</div><div class='ex-stat-val' style='color:#F0F0F0'>"+ex.reps+"</div></div>";
+    exHtml += "<div class='ex-stat'><div class='ex-stat-label'>Descanso</div><div class='ex-stat-val' style='color:#888'>"+ex.rest+"</div></div>";
+    exHtml += "</div>";
+
+    // Set tracker pills
+    exHtml += "<div class='set-label'>Marcar series</div><div class='sets-track'>";
+    for (var s = 0; s < ex.sets; s++) {
+      var sd = !!(exSets[s]);
+      exHtml += "<button class='set-pill"+(sd?" done":"")+"' onclick='event.stopPropagation();toggleSet(\""+ex.id+"\","+s+")'>"+( sd?"✓":(s+1))+"</button>";
+    }
+    exHtml += "</div>";
+
+    exHtml += "<div class='ex-note'>&#128161; "+ex.note+"</div>";
+    exHtml += "</div></div>";
+  });
+
+  document.getElementById("exs-container").innerHTML = exHtml;
+
+  // Tracker
+  var pctV = totalExs > 0 ? Math.min(100, Math.round(doneExs/totalExs*100)) : 0;
+  document.getElementById("tr-pct").textContent = pctV+"%";
+  document.getElementById("tr-fill").style.width = pctV+"%";
+  document.getElementById("tr-info").textContent = doneExs+" / "+totalExs+" ejercicios completados";
+  document.getElementById("tr-sets").textContent = doneSets+"/"+totalSets;
+  document.getElementById("tr-exs").textContent = doneExs+"/"+totalExs;
+}
+
+render();
+</script>
+</body>
+</html>
