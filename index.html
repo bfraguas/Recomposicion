@@ -139,6 +139,28 @@ h1{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
 .set-pill{width:36px;height:36px;border-radius:8px;border:1px solid #2A2A2A;background:transparent;color:#555;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .set-pill.sdone{background:#C8F13525;border-color:#C8F135;color:#C8F135}
 .set-label{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-weight:700}
+
+.set-rows{margin-bottom:12px}
+.set-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #1A1A1A}
+.set-row:last-child{border-bottom:none}
+.set-num{width:30px;height:30px;border-radius:7px;border:1px solid #2A2A2A;background:transparent;color:#555;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.set-num.sdone{background:#C8F13520;border-color:#C8F135;color:#C8F135}
+.set-wfield{display:flex;align-items:center;flex:1;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:7px;transition:border-color .15s}
+.set-wfield:focus-within{border-color:#C8F135}
+.set-w-input{flex:1;background:transparent;border:none;padding:7px 8px;font-size:15px;font-weight:800;color:#F0F0F0;outline:none;text-align:center;width:60px;-moz-appearance:textfield}
+.set-w-input::-webkit-outer-spin-button,.set-w-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.set-w-input::placeholder{color:#333;font-weight:400;font-size:12px}
+.set-w-unit{font-size:11px;color:#555;padding-right:8px;flex-shrink:0}
+.set-w-prev{font-size:10px;color:#444;flex-shrink:0;width:52px;text-align:right;line-height:1.3}
+.set-w-prev.has-prev{color:#666}
+.prog-bar-wrap{margin-top:10px;padding:10px 12px;background:#0F0F0F;border-radius:8px;border:1px solid #1A1A1A}
+.prog-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:6px;font-weight:700}
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.prog-row:last-child{margin-bottom:0}
+.prog-date{font-size:10px;color:#444;flex-shrink:0;width:56px}
+.prog-bar-bg{flex:1;height:4px;background:#1A1A1A;border-radius:2px;overflow:hidden}
+.prog-bar-fill{height:100%;background:#C8F135;border-radius:2px;transition:width .3s}
+.prog-kg{font-size:11px;font-weight:700;color:#888;flex-shrink:0;width:44px;text-align:right}
 /* ─── TRACKER ───────────────────────────── */
 .tracker{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #222;padding:10px 16px 14px;z-index:50;max-width:520px;margin:0 auto}
 .tracker-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
@@ -445,9 +467,32 @@ function renderTraining(){
     html+="<span class='ex-chevron'>&#9662;</span></div>";
     html+="<div class='ex-body'>";
     html+="<div class='ex-stats'><div class='ex-stat'><div class='ex-stat-label'>Series</div><div class='ex-stat-val' style='color:"+col+"'>"+ex.sets+"</div></div><div class='ex-stat'><div class='ex-stat-label'>Reps</div><div class='ex-stat-val'>"+ex.reps+"</div></div><div class='ex-stat'><div class='ex-stat-label'>Descanso</div><div class='ex-stat-val' style='color:#888'>"+ex.rest+"</div></div></div>";
-    html+="<div class='set-label'>Marcar series</div><div class='sets-track'>";
-    for(var s=0;s<ex.sets;s++){var sd=!!(exSets[s]);html+="<button class='set-pill"+(sd?" sdone":"")+"' onclick='event.stopPropagation();toggleSet(\""+ex.id+"\","+s+")' >"+(sd?"✓":(s+1))+"</button>";}
-    html+="</div><div class='ex-note'>&#128161; "+ex.note+"</div></div></div>";
+    var todayW=getTodayW(ex.id),prevW=getPrevW(ex.id);
+    html+="<div class='set-rows'>";
+    for(var s=0;s<ex.sets;s++){
+      var sd=!!(exSets[s]),tw=todayW[s]||"",pw=prevW[s]||"";
+      html+="<div class='set-row'>";
+      html+="<button class='set-num"+(sd?" sdone":"")+"' onclick='event.stopPropagation();toggleSet(\""+ex.id+"\","+s+")' >"+(sd?"&#10003;":(s+1))+"</button>";
+      html+="<div class='set-wfield'><input class='set-w-input' type='number' step='0.5' min='0' max='500' placeholder='"+(pw?pw+" kg":"— kg")+"' value='"+(tw||"")+"' oninput='saveWeight(\""+ex.id+"\","+s+",this.value)'><span class='set-w-unit'>kg</span></div>";
+      html+="<span class='set-w-prev"+(pw?" has-prev":"")+"'>"+(pw?"ant. "+pw+"kg":"")+"</span>";
+      html+="</div>";
+    }
+    html+="</div>";
+    // Progression mini chart (last sessions)
+    var hist=getWHistory(ex.id);
+    if(hist.length>1){
+      var log=loadWLog(ex.id);
+      var maxA=Math.max.apply(null,hist.map(function(d){return avgW(log[d]||{});}));
+      html+="<div class='prog-bar-wrap'><div class='prog-label'>Progresion (media por sesion)</div>";
+      hist.forEach(function(d){
+        var a=avgW(log[d]||{});if(!a)return;
+        var pct=maxA>0?Math.round(a/maxA*100):0;
+        var lbl=d===today?"Hoy":d.substring(5);
+        html+="<div class='prog-row'><span class='prog-date'>"+lbl+"</span><div class='prog-bar-bg'><div class='prog-bar-fill' style='width:"+pct+"%'></div></div><span class='prog-kg'>"+a+"kg</span></div>";
+      });
+      html+="</div>";
+    }
+    html+="<div class='ex-note'>&#128161; "+ex.note+"</div></div></div>";
   });
   document.getElementById("exs-container").innerHTML=html;
   renderTracker();
@@ -483,6 +528,35 @@ function renderTracker(){
       "<div class='tmacro'><span class='tmacro-l'>Ejercicios&nbsp;</span><span class='tmacro-v'>"+doneEx+"/"+totEx+"</span></div>";
   }
 }
+
+
+// ── Weight tracking ───────────────────────────────────────────────────────────
+function wKey(exId){ return "wlog_"+person+"_"+exId; }
+function loadWLog(exId){ try{return JSON.parse(localStorage.getItem(wKey(exId)))||{};}catch(e){return{};} }
+
+function saveWeight(exId, si, val){
+  var log=loadWLog(exId);
+  if(!log[today])log[today]={};
+  var v=parseFloat(val);
+  if(!isNaN(v)&&v>0) log[today][si]=v;
+  else { delete log[today][si]; if(!Object.keys(log[today]).length) delete log[today]; }
+  localStorage.setItem(wKey(exId),JSON.stringify(log));
+}
+
+function getTodayW(exId){ return (loadWLog(exId)[today])||{}; }
+
+function getPrevW(exId){
+  var log=loadWLog(exId);
+  var dates=Object.keys(log).filter(function(d){return d!==today;}).sort();
+  return dates.length ? (log[dates[dates.length-1]]||{}) : {};
+}
+
+function getWHistory(exId){
+  var log=loadWLog(exId);
+  return Object.keys(log).sort().slice(-4); // last 4 sessions
+}
+
+function avgW(w){ var vals=Object.values(w).filter(function(v){return v>0;}); return vals.length? Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length*10)/10:0; }
 
 function renderAll(){ renderDiet(); renderTraining(); renderTracker(); }
 renderAll();
